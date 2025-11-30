@@ -47,7 +47,7 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/yourusername/railway-worker-monitoring.git
+git clone https://github.com/mag7231/sibintek-soft-hack.git
 cd railway-worker-monitoring
 ````
 
