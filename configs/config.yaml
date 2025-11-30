@@ -1,0 +1,95 @@
+# configs/config.yaml
+
+model:
+  weights: 'yolo11m.pt' #'yolo11n.pt'  # Используем nano-версию для максимальной скорости на CPU/GPU
+  conf_threshold: 0.5    # Минимальная уверенность детекции
+
+# Объекты
+target_classes:
+  person: 0
+  train: 6
+
+zones:
+  # 1. Train Number / OCR Zone
+  TrainNumberOCR:
+    description: "Region of interest for OCR on the train's side."
+    coords:
+      [ [913, 635], [914, 404], [615, 385], [621, 635] ] 
+
+  # 2. Main Platform Zone (Перрон)
+  PlatformZone:
+    description: "Pedestrian platform area for cleaners and crew staging."
+    coords:
+      [ [589, 1000], [482, 200], [461, 196], [333, 1000] ] 
+
+  # 3. Main Track Repair Zone (Зона Ремонта)
+  RepairZone:
+    description: "Primary track area for heavy maintenance and mechanic work."
+    coords:
+      [ [482, 200], [492, 200], [650, 395], [650, 640], [920, 640], [920,1000], [590, 1000] ] 
+
+  # 4. Side Crossing Zone (Левый проход)
+  CrossingZone:
+    description: "Left-hand passage area for walking and light duty."
+    coords:
+      [ [0, 565], [360, 565], [360, 1000], [0, 1000] ]
+      
+  # 5. Front Crossing Zone (Проход перед поездом)
+  DriverZone:
+    description: "Driver's window"
+    coords:
+      [[913, 270], [914, 20], [615, 20], [621, 260]]
+
+# Настройки трекера
+tracker:
+  type: "botsort"  # botsort (с ReID) или bytetrack (без ReID)
+  
+  # Параметры трекинга
+  track_high_thresh: 0.5      # Высокий порог для подтвержденных треков
+  track_low_thresh: 0.1       # Низкий порог для потенциальных треков
+  new_track_thresh: 0.6       # Порог для создания нового трека
+  track_buffer: 120           # Frames для хранения потерянного трека (120 = 4 сек при 30fps)
+  match_thresh: 0.8           # Порог для matching треков
+  
+  # ReID настройки (для BoT-SORT)
+  proximity_thresh: 0.5       # Порог для proximity matching
+  appearance_thresh: 0.25     # Порог для appearance matching (ReID)
+  with_reid: true             # Включить ReID features
+  
+  # Настройки для длительного исчезновения
+  long_term_buffer: 9000      # Frames для долгосрочного хранения (9000 = 5 мин при 30fps)
+  reid_confidence: 0.7        # Минимальная уверенность для ReID при переподключении
+
+# Настройки классификатора работников
+classifier:
+  model_name: 'hf-hub:Marqo/marqo-fashionCLIP'  # FashionCLIP (специально для одежды)
+  # Альтернативы: 'ViT-B-16'
+  use_fine_tuned: false        # Использовать дообученную модель
+  fine_tuned_path: 'weights/fashionclip_workers_finetuned.pt'
+  
+  # Оптимизация скорости
+  classify_every_n_frames: 5   # Классифицировать каждые N кадров (остальные используют кэш)
+  
+  # Классы работников
+  classes:
+    mechanic: 'Mechanic'       # Механик - белая спецодежда
+    worker: 'Worker'           # Рабочий - серая спецодежда
+    cleaner: 'Cleaner'         # Уборщик - темно-синяя с оранжевой полосой
+    driver: 'Driver'           # Машинист - форма машиниста
+    unknown: 'Unknown'         # Неизвестный
+  
+  # Порог уверенности для классификации
+  confidence_threshold: 0.4    # Минимальная уверенность для назначения класса
+
+database:
+  path: 'data/app.db'
+
+activity_rules:
+  work_zones:
+    mechanic: ['RepairZone']
+    worker: ['RepairZone']
+    driver: ['RepairZone', 'PlatformZone']
+    cleaner: ['PlatformZone', 'CrossingZone']
+  
+  wrong_zone_threshold: 10.0
+  unknown_in_repair_threshold: 15.0

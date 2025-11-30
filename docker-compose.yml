@@ -1,0 +1,11 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    volumes:
+      - ./data:/app/data  # SQLite файл сохраняется тут
+      - ./weights:/app/weights
+    ports:
+      - "8501:8501"  # Streamlit

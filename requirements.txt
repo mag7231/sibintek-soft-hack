@@ -1,0 +1,15 @@
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+pyyaml>=6.0
+tqdm>=4.65.0
+shapely>=2.0.0
+scipy>=1.10.0
+torch>=2.0.0
+torchvision>=0.15.0
+open-clip-torch>=2.20.0
+pillow>=10.0.0
+sqlalchemy>=2.0.0
+streamlit>=1.28.0
+plotly>=5.17.0
+pandas>=2.0.0
